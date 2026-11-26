@@ -1,0 +1,36 @@
+name: Mergit
+
+# Pays the bounty of a merged pull request, after checking the merge and the CI.
+# Runs when something lands on main or when the CI workflow finishes, in either
+# order. It re-verifies from scratch every time and pays only once.
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [CI]          # must match the `name:` of your test workflow
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to re-check
+        required: true
+
+permissions:
+  contents: read
+  checks: read
+  statuses: read
+  pull-requests: write
+
+concurrency:
+  group: mergit-settle
+  cancel-in-progress: false
+
+jobs:
+  settle:
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned to a tag, never to a branch.
+      - uses: odiseo159-beep/mergit@v1.6
+        with:
+          agent-key: ${{ secrets.MERGIT_AGENT_KEY }}
+          pull-request: ${{ inputs.pr }}
