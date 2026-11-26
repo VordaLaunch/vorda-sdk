@@ -1,0 +1,864 @@
+{
+  "description": "Real trades on the Vorda launchpad bonding curve (GIWA Sepolia testnet). Every amount is a base-10 string of the smallest unit (wei, or 1e-18 token).",
+  "chainId": 91342,
+  "launchpad": "0xb36ee0ACEAe9685c3fCe5e6cB9e05D385f7bd5fB",
+  "rpc": "https://sepolia-rpc.giwa.io",
+  "explorer": "https://sepolia-explorer.giwa.io",
+  "howCollected": [
+    "state: getCurve(token) and platformFeeBps() read with eth_call at stateBlock (= block - 1); feeBps = platformFeeBps + creatorFeeBps.",
+    "For method \"createToken\" the token does not exist at stateBlock; state is the initial curve from the TokenCreated event of the same transaction, and ethIn = msg.value - creationFee (creationFee was 0).",
+    "Only transactions that call the launchpad directly, and are the only trade of that token in their block, are included.",
+    "buy: ethIn = msg.value; expected.tokensOut = Trade.tokenAmount; expected.fee = Trade.fee; expected.refund = ethIn - Trade.ethAmount - Trade.fee.",
+    "sell: tokensIn = Trade.tokenAmount; expected.fee = Trade.fee; expected.ethOut = Trade.ethAmount - Trade.fee."
+  ],
+  "vectors": [
+    {
+      "id": "buy-01",
+      "kind": "buy",
+      "label": "first trade on a fresh curve",
+      "txHash": "0xee6537d4d4f22cd179970fc815efad7209992243c24427875030b82876521d1a",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0xee6537d4d4f22cd179970fc815efad7209992243c24427875030b82876521d1a",
+      "block": 41929160,
+      "stateBlock": 41929159,
+      "method": "buy",
+      "token": "0x1645af47E95411dFff0b91e898C8cf16d5C5A265",
+      "state": {
+        "virtualEth": "500000000000000000",
+        "virtualToken": "1073000000000000000000000000",
+        "realEth": "0",
+        "tokensSold": "0",
+        "feeBps": "200"
+      },
+      "ethIn": "1000000000000000000",
+      "expected": {
+        "tokensOut": "710500000000000000000000000",
+        "fee": "20000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-02",
+      "kind": "buy",
+      "label": "first trade on a fresh curve",
+      "txHash": "0x74f00eda798bfcc7ea02b51bea78bcbc8f0608ef543158cb55a8be9c3a5864ec",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x74f00eda798bfcc7ea02b51bea78bcbc8f0608ef543158cb55a8be9c3a5864ec",
+      "block": 41498180,
+      "stateBlock": 41498179,
+      "method": "buy",
+      "token": "0x7fCd5c86291F990111836115B8C92361E115D627",
+      "state": {
+        "virtualEth": "500000000000000000",
+        "virtualToken": "1073000000000000000000000000",
+        "realEth": "0",
+        "tokensSold": "0",
+        "feeBps": "200"
+      },
+      "ethIn": "700000000000000000",
+      "expected": {
+        "tokensOut": "620639123102866779089376053",
+        "fee": "14000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-03",
+      "kind": "buy",
+      "label": "token creation with initial buy",
+      "txHash": "0xe0e2a0465dc440909cce1e07e1ba56f151ae935c736cb02251ee8194546dd07e",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0xe0e2a0465dc440909cce1e07e1ba56f151ae935c736cb02251ee8194546dd07e",
+      "block": 41222758,
+      "stateBlock": 41222757,
+      "method": "createToken",
+      "token": "0xD9838c725f9850fF43bfA06ccc7203217A8472Ea",
+      "state": {
+        "virtualEth": "500000000000000000",
+        "virtualToken": "1073000000000000000000000000",
+        "realEth": "0",
+        "tokensSold": "0",
+        "feeBps": "300"
+      },
+      "ethIn": "1000000000000000000",
+      "expected": {
+        "tokensOut": "708034013605442176870748299",
+        "fee": "30000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-04",
+      "kind": "buy",
+      "label": "smallest size",
+      "txHash": "0x87c1839e897489fcf91366fa9656d135e16c7b6b4810847a8a230f59a68a1850",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x87c1839e897489fcf91366fa9656d135e16c7b6b4810847a8a230f59a68a1850",
+      "block": 41770469,
+      "stateBlock": 41770468,
+      "method": "buy",
+      "token": "0x9eA2b1F18a48c4143Bed6C7184E9C4c8f2062Da5",
+      "state": {
+        "virtualEth": "500000000000000001",
+        "virtualToken": "1073000000000000000000000000",
+        "realEth": "1",
+        "tokensSold": "0",
+        "feeBps": "200"
+      },
+      "ethIn": "1000000000000",
+      "expected": {
+        "tokensOut": "2103075877971279172086",
+        "fee": "20000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-05",
+      "kind": "buy",
+      "label": "smallest size",
+      "txHash": "0xfdc2ceccc0e0b120bfc7e9859a33a55a673b84c8d85f557727e1b2c08703ab43",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0xfdc2ceccc0e0b120bfc7e9859a33a55a673b84c8d85f557727e1b2c08703ab43",
+      "block": 41397609,
+      "stateBlock": 41397608,
+      "method": "buy",
+      "token": "0x4d49Cd9dB60a95459DE218323dfc94f9D8A9267e",
+      "state": {
+        "virtualEth": "500000000000000001",
+        "virtualToken": "1073000000000000000000000000",
+        "realEth": "1",
+        "tokensSold": "0",
+        "feeBps": "200"
+      },
+      "ethIn": "1000000000000",
+      "expected": {
+        "tokensOut": "2103075877971279172086",
+        "fee": "20000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-06",
+      "kind": "buy",
+      "label": "largest size",
+      "txHash": "0x442773850c94bbd7982ce42dab8b3065f5d74d59e80b89f29deb83a7305298fa",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x442773850c94bbd7982ce42dab8b3065f5d74d59e80b89f29deb83a7305298fa",
+      "block": 41956866,
+      "stateBlock": 41956865,
+      "method": "buy",
+      "token": "0xE896478FA86560D49941945122C9676DBb1eB16C",
+      "state": {
+        "virtualEth": "598000000000000000",
+        "virtualToken": "897157190635451505016722409",
+        "realEth": "98000000000000000",
+        "tokensSold": "175842809364548494983277591",
+        "feeBps": "200"
+      },
+      "ethIn": "1000000000000000000",
+      "expected": {
+        "tokensOut": "557169864906680909325974626",
+        "fee": "20000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-07",
+      "kind": "buy",
+      "label": "largest size",
+      "txHash": "0x450568a5cdb24c0e783376412027843e08bf2d14a403e2c54abf1eba8fb55385",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x450568a5cdb24c0e783376412027843e08bf2d14a403e2c54abf1eba8fb55385",
+      "block": 41956533,
+      "stateBlock": 41956532,
+      "method": "buy",
+      "token": "0x9abe284f87DD49006c457eB89EaeEA4A41B6c46c",
+      "state": {
+        "virtualEth": "634260000000000002",
+        "virtualToken": "845867625264087283118274091",
+        "realEth": "134260000000000002",
+        "tokensSold": "227132374735912716881725909",
+        "feeBps": "200"
+      },
+      "ethIn": "1000000000000000000",
+      "expected": {
+        "tokensOut": "513517198443129072410190559",
+        "fee": "20000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-08",
+      "kind": "buy",
+      "label": "early curve",
+      "txHash": "0x71782105f5962579bc72c8a9d5740b230c0a06ab9b391cc9e52a5d21f0f96619",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x71782105f5962579bc72c8a9d5740b230c0a06ab9b391cc9e52a5d21f0f96619",
+      "block": 41242466,
+      "stateBlock": 41242465,
+      "method": "buy",
+      "token": "0x9CA0b7eeADd045d199b7B9E62c04a6d2FA9493F3",
+      "state": {
+        "virtualEth": "504900000000000000",
+        "virtualToken": "1062586650821944939591998416",
+        "realEth": "4900000000000000",
+        "tokensSold": "10413349178055060408001584",
+        "feeBps": "200"
+      },
+      "ethIn": "5000000000000000",
+      "expected": {
+        "tokensOut": "10213171025946508834838745",
+        "fee": "100000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-09",
+      "kind": "buy",
+      "label": "mid curve",
+      "txHash": "0x0922eaee6d9c797267b443d4da4c761cd2bb2c0163eac472ce868865c6c84148",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x0922eaee6d9c797267b443d4da4c761cd2bb2c0163eac472ce868865c6c84148",
+      "block": 41662373,
+      "stateBlock": 41662372,
+      "method": "buy",
+      "token": "0x2E2E92726b735B1aCd0637C5831b8bE106c83A7b",
+      "state": {
+        "virtualEth": "901800000000000000",
+        "virtualToken": "594921268573963184741627856",
+        "realEth": "401800000000000000",
+        "tokensSold": "478078731426036815258372144",
+        "feeBps": "200"
+      },
+      "ethIn": "500000000000000000",
+      "expected": {
+        "tokensOut": "209449217991983015177035241",
+        "fee": "10000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-10",
+      "kind": "buy",
+      "label": "mid curve",
+      "txHash": "0x09a373d817391ab8b4a8d059d20a2280f81178f4e06a36f6015214cc4dddd1f2",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x09a373d817391ab8b4a8d059d20a2280f81178f4e06a36f6015214cc4dddd1f2",
+      "block": 41713201,
+      "stateBlock": 41713200,
+      "method": "buy",
+      "token": "0xC861268A9B91085B7d5a66D08372Ef1203a825fa",
+      "state": {
+        "virtualEth": "716580000000000000",
+        "virtualToken": "748695191046359094588182759",
+        "realEth": "216580000000000000",
+        "tokensSold": "324304808953640905411817241",
+        "feeBps": "200"
+      },
+      "ethIn": "500000000000000000",
+      "expected": {
+        "tokensOut": "304049995535079278910813664",
+        "fee": "10000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-11",
+      "kind": "buy",
+      "label": "late curve",
+      "txHash": "0x23811159a9f0217f1955e0486edf05a7ad18ad38438f84561f09a041a64d4103",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x23811159a9f0217f1955e0486edf05a7ad18ad38438f84561f09a041a64d4103",
+      "block": 41536842,
+      "stateBlock": 41536841,
+      "method": "buy",
+      "token": "0x0a2309B1FCe5DDC75eA65dDb3B9f61D9a4B6bFd5",
+      "state": {
+        "virtualEth": "990980000000000000",
+        "virtualToken": "541383277159983047084704031",
+        "realEth": "490980000000000000",
+        "tokensSold": "531616722840016952915295969",
+        "feeBps": "200"
+      },
+      "ethIn": "800000000000000000",
+      "expected": {
+        "tokensOut": "239126350321370781031002017",
+        "fee": "16000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-12",
+      "kind": "buy",
+      "label": "near graduation, does not graduate",
+      "txHash": "0x785f8ca9af40e002994e56bed29f85750ddcc30e44b50c3d5e45b2c6e0a823f6",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x785f8ca9af40e002994e56bed29f85750ddcc30e44b50c3d5e45b2c6e0a823f6",
+      "block": 42015578,
+      "stateBlock": 42015577,
+      "method": "buy",
+      "token": "0xd09617339384307191E25735b02f69267590D26D",
+      "state": {
+        "virtualEth": "1955300000000000000",
+        "virtualToken": "274382447706234337441824786",
+        "realEth": "1455300000000000000",
+        "tokensSold": "798617552293765662558175214",
+        "feeBps": "200"
+      },
+      "ethIn": "10000000000000000",
+      "expected": {
+        "tokensOut": "1368351731474783220665555",
+        "fee": "200000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-13",
+      "kind": "buy",
+      "label": "near graduation, does not graduate",
+      "txHash": "0x14672aa9464ef61a7ed373d51860261d0bbd32d69d1f97bbef9d1ff062ab5a12",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x14672aa9464ef61a7ed373d51860261d0bbd32d69d1f97bbef9d1ff062ab5a12",
+      "block": 41318508,
+      "stateBlock": 41318507,
+      "method": "buy",
+      "token": "0xf4bAFd7cbAf6884fa318CE7cdD51b8b925599831",
+      "state": {
+        "virtualEth": "1932760000000000000",
+        "virtualToken": "277582317514849231151306941",
+        "realEth": "1432760000000000000",
+        "tokensSold": "795417682485150768848693059",
+        "feeBps": "200"
+      },
+      "ethIn": "10000000000000000",
+      "expected": {
+        "tokensOut": "1400372040835558471955979",
+        "fee": "200000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-14",
+      "kind": "buy",
+      "label": "creator fee 0 bps",
+      "txHash": "0x1f262195726c739dc0db4a206228a97a015a65c05346223e6a3f126bdc6799cd",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x1f262195726c739dc0db4a206228a97a015a65c05346223e6a3f126bdc6799cd",
+      "block": 42101472,
+      "stateBlock": 42101471,
+      "method": "buy",
+      "token": "0x431E50Cf993522a23D122bEAb440a067C7F082DE",
+      "state": {
+        "virtualEth": "630680000000000000",
+        "virtualToken": "850669119046108961755565424",
+        "realEth": "130680000000000000",
+        "tokensSold": "222330880953891038244434576",
+        "feeBps": "100"
+      },
+      "ethIn": "300000000000000000",
+      "expected": {
+        "tokensOut": "272344696831552218050839654",
+        "fee": "3000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-15",
+      "kind": "buy",
+      "label": "creator fee 50 bps",
+      "txHash": "0x2c5e094cad28053c49b67ce4e4da2fe6c50519782e91d409ddb8112a69edfe87",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x2c5e094cad28053c49b67ce4e4da2fe6c50519782e91d409ddb8112a69edfe87",
+      "block": 42257470,
+      "stateBlock": 42257469,
+      "method": "buy",
+      "token": "0x0956a270a0d0289d777778A220e5ACdF1c8e78fA",
+      "state": {
+        "virtualEth": "1249312467288516146",
+        "virtualToken": "429436201148628034321792122",
+        "realEth": "749312467288516146",
+        "tokensSold": "643563798851371965678207878",
+        "feeBps": "150"
+      },
+      "ethIn": "200000000000000000",
+      "expected": {
+        "tokensOut": "58492845453294147966875678",
+        "fee": "3000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-16",
+      "kind": "buy",
+      "label": "creator fee 400 bps",
+      "txHash": "0xad7a1ebb5f6dedd1fe273642bb26e5ff16b26c657a13b84f2a45e12c9c50af4c",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0xad7a1ebb5f6dedd1fe273642bb26e5ff16b26c657a13b84f2a45e12c9c50af4c",
+      "block": 42103360,
+      "stateBlock": 42103359,
+      "method": "buy",
+      "token": "0xe49439359057B6766BB0c946EC253d0A3fEB99AE",
+      "state": {
+        "virtualEth": "509500000000000001",
+        "virtualToken": "1052993130520117762512266929",
+        "realEth": "9500000000000001",
+        "tokensSold": "20006869479882237487733071",
+        "feeBps": "500"
+      },
+      "ethIn": "300000000000000000",
+      "expected": {
+        "tokensOut": "377725666706398441709591451",
+        "fee": "15000000000000000",
+        "refund": "0"
+      }
+    },
+    {
+      "id": "buy-17",
+      "kind": "buy",
+      "label": "fills the curve (graduation, partial fill with refund)",
+      "txHash": "0xe589f043f3717968b1f5b2c3f28faf8fdb7a1c9fba99126f40f25fd510f86099",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0xe589f043f3717968b1f5b2c3f28faf8fdb7a1c9fba99126f40f25fd510f86099",
+      "block": 42195780,
+      "stateBlock": 42195779,
+      "method": "buy",
+      "token": "0xDa5AD71BeD377474A760435bEaff1bB202AF1a40",
+      "state": {
+        "virtualEth": "1964178800000000000",
+        "virtualToken": "273142139605620425187360748",
+        "realEth": "1464178800000000000",
+        "tokensSold": "799857860394379574812639252",
+        "feeBps": "200"
+      },
+      "ethIn": "2000000000000000",
+      "expected": {
+        "tokensOut": "142139605620425187360748",
+        "fee": "20870718397250",
+        "refund": "956464080137548"
+      }
+    },
+    {
+      "id": "buy-18",
+      "kind": "buy",
+      "label": "fills the curve (graduation, partial fill with refund)",
+      "txHash": "0x2b49d25e0c9e6da5b43bb215ddb7bcc512b8df019d6539765d86157270305bfe",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x2b49d25e0c9e6da5b43bb215ddb7bcc512b8df019d6539765d86157270305bfe",
+      "block": 41915070,
+      "stateBlock": 41915069,
+      "method": "buy",
+      "token": "0xC65501cC4F172bA39881bAFA1889A7178c7760A8",
+      "state": {
+        "virtualEth": "500000000000000000",
+        "virtualToken": "1073000000000000000000000000",
+        "realEth": "0",
+        "tokensSold": "0",
+        "feeBps": "100"
+      },
+      "ethIn": "1480501480001480001",
+      "expected": {
+        "tokensOut": "800000000000000000000000000",
+        "fee": "14800014800014801",
+        "refund": "499999999999998"
+      }
+    },
+    {
+      "id": "buy-19",
+      "kind": "buy",
+      "label": "fills the curve (graduation, partial fill with refund)",
+      "txHash": "0x421c262d6da5f2685b4265f7552f2796a73b46c21de112f1e7d88d96458059ae",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x421c262d6da5f2685b4265f7552f2796a73b46c21de112f1e7d88d96458059ae",
+      "block": 41915160,
+      "stateBlock": 41915159,
+      "method": "buy",
+      "token": "0x62eC04167e8EA3309E54E7329a8a5FCec4bEd6d6",
+      "state": {
+        "virtualEth": "500000000000000000",
+        "virtualToken": "1073000000000000000000000000",
+        "realEth": "0",
+        "tokensSold": "0",
+        "feeBps": "100"
+      },
+      "ethIn": "1480501480001480001",
+      "expected": {
+        "tokensOut": "800000000000000000000000000",
+        "fee": "14800014800014801",
+        "refund": "499999999999998"
+      }
+    },
+    {
+      "id": "buy-20",
+      "kind": "buy",
+      "label": "fills the curve (graduation), creator fee > 0",
+      "txHash": "0x8e7e4baffa6187a7c60741bbeb191ff41be5dd87663386296fa9a17c8aca33cc",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x8e7e4baffa6187a7c60741bbeb191ff41be5dd87663386296fa9a17c8aca33cc",
+      "block": 41223110,
+      "stateBlock": 41223109,
+      "method": "buy",
+      "token": "0xD9838c725f9850fF43bfA06ccc7203217A8472Ea",
+      "state": {
+        "virtualEth": "1470000000000000000",
+        "virtualToken": "364965986394557823129251701",
+        "realEth": "970000000000000000",
+        "tokensSold": "708034013605442176870748299",
+        "feeBps": "300"
+      },
+      "ethIn": "1000000000000000000",
+      "expected": {
+        "tokensOut": "91965986394557823129251701",
+        "fee": "15315509233035007",
+        "refund": "489483025565499791"
+      }
+    },
+    {
+      "id": "sell-21",
+      "kind": "sell",
+      "label": "full exit, curve back to zero sold",
+      "txHash": "0x3eebf52a8a8accf1ffa7bb174a6646cd19da45347447c9576e813f41c40d6b6c",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x3eebf52a8a8accf1ffa7bb174a6646cd19da45347447c9576e813f41c40d6b6c",
+      "block": 42102735,
+      "stateBlock": 42102734,
+      "method": "sell",
+      "token": "0x514d5fD4ba830CEbe5c9a2e268A51670CA833E01",
+      "state": {
+        "virtualEth": "529100000000000000",
+        "virtualToken": "1013986013986013986013986014",
+        "realEth": "29100000000000000",
+        "tokensSold": "59013986013986013986013986",
+        "feeBps": "300"
+      },
+      "tokensIn": "59013986013986013986013986",
+      "expected": {
+        "ethOut": "28227000000000000",
+        "fee": "872999999999999"
+      }
+    },
+    {
+      "id": "sell-22",
+      "kind": "sell",
+      "label": "full exit, curve back to zero sold",
+      "txHash": "0x838a67f1e7e58d3ac45dad7635b4159de3feaa80a40426fcd1612f42040327a7",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x838a67f1e7e58d3ac45dad7635b4159de3feaa80a40426fcd1612f42040327a7",
+      "block": 42093369,
+      "stateBlock": 42093368,
+      "method": "sell",
+      "token": "0x7FB2Ac528e37B5992Ff085Db5BB197F6ae4A3792",
+      "state": {
+        "virtualEth": "519400000000000000",
+        "virtualToken": "1032922603003465537158259531",
+        "realEth": "19400000000000000",
+        "tokensSold": "40077396996534462841740469",
+        "feeBps": "300"
+      },
+      "tokensIn": "40077396996534462841740469",
+      "expected": {
+        "ethOut": "18818000000000000",
+        "fee": "581999999999999"
+      }
+    },
+    {
+      "id": "sell-23",
+      "kind": "sell",
+      "label": "smallest size",
+      "txHash": "0xdbda80ab2650478ff0095b1047a4e57091880bb439525659a21b949a5e7e28f2",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0xdbda80ab2650478ff0095b1047a4e57091880bb439525659a21b949a5e7e28f2",
+      "block": 41480325,
+      "stateBlock": 41480324,
+      "method": "sell",
+      "token": "0xB12C69c31E304DaB4F9FFE1542552257d2c90D8B",
+      "state": {
+        "virtualEth": "547845500000000000",
+        "virtualToken": "979290694182940263267654842",
+        "realEth": "47845500000000000",
+        "tokensSold": "93709305817059736732345158",
+        "feeBps": "450"
+      },
+      "tokensIn": "170738952614278037685186",
+      "expected": {
+        "ethOut": "91202500000000",
+        "fee": "4297499999999"
+      }
+    },
+    {
+      "id": "sell-24",
+      "kind": "sell",
+      "label": "largest size",
+      "txHash": "0x64390e057c6dacb765fbc16c6e3ef62e72c1f39e64b304c8e174681748bd3bc1",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x64390e057c6dacb765fbc16c6e3ef62e72c1f39e64b304c8e174681748bd3bc1",
+      "block": 42094031,
+      "stateBlock": 42094030,
+      "method": "sell",
+      "token": "0xD8Df4e5d50ec2b289b036dE0d94Bd535E4E63FB5",
+      "state": {
+        "virtualEth": "777871677017427463",
+        "virtualToken": "689702448168684558816346759",
+        "realEth": "277871677017427463",
+        "tokensSold": "383297551831315441183653241",
+        "feeBps": "250"
+      },
+      "tokensIn": "26404691525270000000000000",
+      "expected": {
+        "ethOut": "27965054425376860",
+        "fee": "717052677573765"
+      }
+    },
+    {
+      "id": "sell-25",
+      "kind": "sell",
+      "label": "largest size",
+      "txHash": "0x3292ea4ae7f701215da6312c78ce0f2845eaac8bdd4b758d298da6acd42301ca",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x3292ea4ae7f701215da6312c78ce0f2845eaac8bdd4b758d298da6acd42301ca",
+      "block": 41468638,
+      "stateBlock": 41468637,
+      "method": "sell",
+      "token": "0x9F51a4CC450571722e47469a96D42FbAa9881A46",
+      "state": {
+        "virtualEth": "510780000000000000",
+        "virtualToken": "1050354359998433767962723678",
+        "realEth": "10780000000000000",
+        "tokensSold": "22645640001566232037276322",
+        "feeBps": "200"
+      },
+      "tokensIn": "22645640001566232037276322",
+      "expected": {
+        "ethOut": "10564400000000000",
+        "fee": "215599999999999"
+      }
+    },
+    {
+      "id": "sell-26",
+      "kind": "sell",
+      "label": "early curve",
+      "txHash": "0x8eefaf31a67ac7d827152a54e78514e03451bd08dbb2cdb283984f9e3930e4d9",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x8eefaf31a67ac7d827152a54e78514e03451bd08dbb2cdb283984f9e3930e4d9",
+      "block": 41285476,
+      "stateBlock": 41285475,
+      "method": "sell",
+      "token": "0x247aD82e404be326ad329cdffA26Ff03352bcC70",
+      "state": {
+        "virtualEth": "540180000000000000",
+        "virtualToken": "993187456033174127142804252",
+        "realEth": "40180000000000000",
+        "tokensSold": "79812543966825872857195748",
+        "feeBps": "200"
+      },
+      "tokensIn": "14829813949803081552357022",
+      "expected": {
+        "ethOut": "7788114107954828",
+        "fee": "158941104243976"
+      }
+    },
+    {
+      "id": "sell-27",
+      "kind": "sell",
+      "label": "early curve",
+      "txHash": "0x2e14e9024991f65f81fa758e88dfb0b521f76e989ac809c4f5fb13b9f84d38d2",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x2e14e9024991f65f81fa758e88dfb0b521f76e989ac809c4f5fb13b9f84d38d2",
+      "block": 41285532,
+      "stateBlock": 41285531,
+      "method": "sell",
+      "token": "0x247aD82e404be326ad329cdffA26Ff03352bcC70",
+      "state": {
+        "virtualEth": "527415483609736966",
+        "virtualToken": "1017224591754657618170048815",
+        "realEth": "27415483609736966",
+        "tokensSold": "55775408245342381829951185",
+        "feeBps": "200"
+      },
+      "tokensIn": "14281783568913643039543195",
+      "expected": {
+        "ethOut": "7156315548448688",
+        "fee": "146047256090789"
+      }
+    },
+    {
+      "id": "sell-28",
+      "kind": "sell",
+      "label": "mid curve",
+      "txHash": "0x060c6e62f27d3aceeebb914181fb9c24bd87133ceb75c94ddf6af124447f1341",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x060c6e62f27d3aceeebb914181fb9c24bd87133ceb75c94ddf6af124447f1341",
+      "block": 42139864,
+      "stateBlock": 42139863,
+      "method": "sell",
+      "token": "0x391aef73956503E56472414a1B2DCCF53130b327",
+      "state": {
+        "virtualEth": "646020000000000000",
+        "virtualToken": "830469644902634593356242846",
+        "realEth": "146020000000000000",
+        "tokensSold": "242530355097365406643757154",
+        "feeBps": "200"
+      },
+      "tokensIn": "12792119895705603431032001",
+      "expected": {
+        "ethOut": "9604000000000000",
+        "fee": "195999999999999"
+      }
+    },
+    {
+      "id": "sell-29",
+      "kind": "sell",
+      "label": "mid curve",
+      "txHash": "0xfb54db02be386d76595a2d54cd2b03dd66794cbbe7a0cad233b74152fa963ee2",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0xfb54db02be386d76595a2d54cd2b03dd66794cbbe7a0cad233b74152fa963ee2",
+      "block": 41916907,
+      "stateBlock": 41916906,
+      "method": "sell",
+      "token": "0x63279e267AD6442Eb16394245BBe67A8Ff5E0448",
+      "state": {
+        "virtualEth": "661719502000000001",
+        "virtualToken": "810766493020784507629181195",
+        "realEth": "161719502000000001",
+        "tokensSold": "262233506979215492370818805",
+        "feeBps": "200"
+      },
+      "tokensIn": "12187872286728566317039098",
+      "expected": {
+        "ethOut": "9604000000000000",
+        "fee": "195999999999999"
+      }
+    },
+    {
+      "id": "sell-30",
+      "kind": "sell",
+      "label": "late curve",
+      "txHash": "0x1981e204cc9d7beae3efecf9aeeddbf3ac619ee18616defd982777ff13a3eb11",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x1981e204cc9d7beae3efecf9aeeddbf3ac619ee18616defd982777ff13a3eb11",
+      "block": 41885466,
+      "stateBlock": 41885465,
+      "method": "sell",
+      "token": "0x0504123207b872cF0d637342c2E3Fe3aD3dA8db4",
+      "state": {
+        "virtualEth": "1962160000000000001",
+        "virtualToken": "273423166306519346038112627",
+        "realEth": "1462160000000000001",
+        "tokensSold": "799576833693480653961887373",
+        "feeBps": "200"
+      },
+      "tokensIn": "5573796708831987331572273",
+      "expected": {
+        "ethOut": "38416000000000000",
+        "fee": "783999999999999"
+      }
+    },
+    {
+      "id": "sell-31",
+      "kind": "sell",
+      "label": "late curve",
+      "txHash": "0x9fc7f641ef8c55d13db09438dcb68c6787b0cc47cb0b30c6cfe055433afcac7b",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x9fc7f641ef8c55d13db09438dcb68c6787b0cc47cb0b30c6cfe055433afcac7b",
+      "block": 41862871,
+      "stateBlock": 41862870,
+      "method": "sell",
+      "token": "0x0504123207b872cF0d637342c2E3Fe3aD3dA8db4",
+      "state": {
+        "virtualEth": "1864160000000000000",
+        "virtualToken": "287797184791005063943009188",
+        "realEth": "1364160000000000000",
+        "tokensSold": "785202815208994936056990812",
+        "feeBps": "200"
+      },
+      "tokensIn": "7769046285043328485206510",
+      "expected": {
+        "ethOut": "48020000000000000",
+        "fee": "979999999999999"
+      }
+    },
+    {
+      "id": "sell-32",
+      "kind": "sell",
+      "label": "creator fee 0 bps",
+      "txHash": "0x75e2263c6a80c133276df752fe4c2fa2e548b9576b64edaaeb316f53558c1fc1",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x75e2263c6a80c133276df752fe4c2fa2e548b9576b64edaaeb316f53558c1fc1",
+      "block": 41385505,
+      "stateBlock": 41385504,
+      "method": "sell",
+      "token": "0x0d8c9B9B95d476BF618B49F4c65931d1Ae8BF09b",
+      "state": {
+        "virtualEth": "503861000000000000",
+        "virtualToken": "1064777785936994528252831635",
+        "realEth": "3861000000000000",
+        "tokensSold": "8222214063005471747168365",
+        "feeBps": "100"
+      },
+      "tokensIn": "4200716935200274897716005",
+      "expected": {
+        "ethOut": "1960200000000000",
+        "fee": "19799999999999"
+      }
+    },
+    {
+      "id": "sell-33",
+      "kind": "sell",
+      "label": "creator fee 50 bps",
+      "txHash": "0x9a036577954c3fdcb1fd1e284c45f7f64ef4d27a198a4a3b8250e24873eb7728",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x9a036577954c3fdcb1fd1e284c45f7f64ef4d27a198a4a3b8250e24873eb7728",
+      "block": 41780380,
+      "stateBlock": 41780379,
+      "method": "sell",
+      "token": "0xE2De9FfFa6989981d46A40661e456268cAAc20d5",
+      "state": {
+        "virtualEth": "500098500000000000",
+        "virtualToken": "1072788660633855130539283762",
+        "realEth": "98500000000000",
+        "tokensSold": "211339366144869460716238",
+        "feeBps": "150"
+      },
+      "tokensIn": "211339366144869460716238",
+      "expected": {
+        "ethOut": "97022500000000",
+        "fee": "1477499999999"
+      }
+    },
+    {
+      "id": "sell-34",
+      "kind": "sell",
+      "label": "creator fee 150 bps",
+      "txHash": "0xfd2d5a677b40c7c9e3b1533768601496a6bc77729f617ca948dcac2d4c0f678c",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0xfd2d5a677b40c7c9e3b1533768601496a6bc77729f617ca948dcac2d4c0f678c",
+      "block": 42102781,
+      "stateBlock": 42102780,
+      "method": "sell",
+      "token": "0xD8Df4e5d50ec2b289b036dE0d94Bd535E4E63FB5",
+      "state": {
+        "virtualEth": "749189569914476838",
+        "virtualToken": "716107139693954558816346759",
+        "realEth": "249189569914476838",
+        "tokensSold": "356892860306045441183653241",
+        "feeBps": "250"
+      },
+      "tokensIn": "5000000000000218983535661",
+      "expected": {
+        "ethOut": "5064849524140487",
+        "fee": "129867936516422"
+      }
+    },
+    {
+      "id": "sell-35",
+      "kind": "sell",
+      "label": "creator fee 350 bps",
+      "txHash": "0x6d88cb4aade61be16ef8c0ab0d516408780569c6b7b91fefd305b2d143c08fa7",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x6d88cb4aade61be16ef8c0ab0d516408780569c6b7b91fefd305b2d143c08fa7",
+      "block": 41862907,
+      "stateBlock": 41862906,
+      "method": "sell",
+      "token": "0xB12C69c31E304DaB4F9FFE1542552257d2c90D8B",
+      "state": {
+        "virtualEth": "678699600000000001",
+        "virtualToken": "790482269327991353153853584",
+        "realEth": "178699600000000001",
+        "tokensSold": "282517730672008646846146416",
+        "feeBps": "450"
+      },
+      "tokensIn": "5600853324008588951507034",
+      "expected": {
+        "ethOut": "4560125000000000",
+        "fee": "214874999999999"
+      }
+    },
+    {
+      "id": "sell-36",
+      "kind": "sell",
+      "label": "creator fee 400 bps",
+      "txHash": "0x68888b394ab2f26953927f1aad7b9c02e70934aa07f9a90d4ec04a7a184cccd3",
+      "explorer": "https://sepolia-explorer.giwa.io/tx/0x68888b394ab2f26953927f1aad7b9c02e70934aa07f9a90d4ec04a7a184cccd3",
+      "block": 42075869,
+      "stateBlock": 42075868,
+      "method": "sell",
+      "token": "0xBef21B2E95BD6B4C62efCD060AADC84ea462b2F7",
+      "state": {
+        "virtualEth": "623500000000000000",
+        "virtualToken": "860465116279069767441860468",
+        "realEth": "123500000000000000",
+        "tokensSold": "212534883720930232558139532",
+        "feeBps": "500"
+      },
+      "tokensIn": "13313385349594727672146049",
+      "expected": {
+        "ethOut": "9025000000000000",
+        "fee": "474999999999999"
+      }
+    }
+  ]
+}
