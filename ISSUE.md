@@ -1,64 +1,34 @@
-# Implement `quoteBuy` and `quoteSell` for the Vorda bonding curve
+Implement quoteBuy and quoteSell for the Vorda bonding curve
 
-## Goal
+Vorda is a token launchpad on the GIWA Sepolia testnet. Tokens trade on a bonding curve until the curve sells out. This task is to implement the two stubs in src/index.js so they return, off chain, exactly what the contract produces for a buy or a sell, down to the last wei.
 
-Vorda is a token launchpad on the GIWA Sepolia testnet. Tokens trade on a
-bonding curve until the curve is sold out.
+The bounty is paid in test ETH on GIWA Sepolia through Mergit once the pull request is merged with CI green.
 
-Implement the two stubs in `src/index.js` so that they return, off chain, the
-exact result of a buy or a sell on that curve: the same integers the contract
-produces, down to the last wei.
-
-The bounty is paid through Mergit in test ETH on GIWA Sepolia when the pull
-request is merged with CI green.
-
-## Function signatures
+Function signatures:
 
 ```js
-/**
- * @param {CurveState} state
- * @param {bigint} ethIn     ETH sent by the buyer, fee included, in wei
- * @returns {{ tokensOut: bigint, fee: bigint, refund: bigint }}
- */
-export function quoteBuy(state, ethIn) {}
+// ethIn: ETH sent by the buyer in wei, fee included
+export function quoteBuy(state, ethIn) // returns { tokensOut, fee, refund }
 
-/**
- * @param {CurveState} state
- * @param {bigint} tokensIn  tokens sold back to the curve, in 1e-18 token
- * @returns {{ ethOut: bigint, fee: bigint }}
- */
-export function quoteSell(state, tokensIn) {}
+// tokensIn: tokens sold back to the curve, 18 decimals
+export function quoteSell(state, tokensIn) // returns { ethOut, fee }
 ```
 
-`CurveState`, all fields `bigint`:
+All values are BigInt. The state object has five fields: virtualEth and virtualToken are the virtual reserves, realEth is the ETH the curve actually holds, tokensSold is how much has been sold so far (0 to CURVE_SUPPLY), and feeBps is the total fee in basis points (platform plus creator, 0 to 500). CURVE_SUPPLY, BPS and MAX_FEE_BPS are already exported from src/index.js, please keep them.
 
-| Field | Meaning |
-| --- | --- |
-| `virtualEth` | virtual ETH reserve, wei |
-| `virtualToken` | virtual token reserve, 1e-18 token |
-| `realEth` | ETH actually held by the curve, wei |
-| `tokensSold` | tokens sold so far, `0..CURVE_SUPPLY` |
-| `feeBps` | total fee in basis points, `platformFeeBps + creatorFeeBps`, `0..500` |
+Formula
 
-The constants `CURVE_SUPPLY`, `BPS` and `MAX_FEE_BPS` are already exported from
-`src/index.js`. Keep them.
-
-## Formula
-
-All values are unsigned integers and `/` is integer division rounding down, as
-in Solidity. Multiply first, then divide, in the order written. Use `BigInt`
-only; no floating point.
+Everything is unsigned integer math and division rounds down, like Solidity. Multiply first, then divide, in the order shown. No floating point.
 
 ```
 CURVE_SUPPLY = 800_000_000 * 10^18
 BPS          = 10_000
 MAX_FEE_BPS  = 500
 
-ceilDiv(a, b) = 0                  if a == 0
-              = (a - 1) / b + 1    otherwise
+ceilDiv(a, b) = 0 if a == 0, otherwise (a - 1) / b + 1
 ```
 
-### quoteBuy(state, ethIn)
+quoteBuy(state, ethIn):
 
 ```
 if ethIn == 0 or tokensSold == CURVE_SUPPLY:
@@ -81,7 +51,7 @@ if tokensOut >= remaining:              # this buy sells out the curve
 return { tokensOut, fee, refund }
 ```
 
-### quoteSell(state, tokensIn)
+quoteSell(state, tokensIn):
 
 ```
 if tokensIn > tokensSold:
@@ -98,53 +68,21 @@ ethOut   = grossOut - fee
 return { ethOut, fee }
 ```
 
-### Input validation
+Input checks: if the input or any state field is not a BigInt, throw TypeError. Negative values, feeBps above MAX_FEE_BPS and tokensSold above CURVE_SUPPLY throw RangeError. Do not modify state.
 
-- `ethIn`, `tokensIn` and every field of `state` must be a `bigint`; otherwise
-  throw `TypeError`.
-- Negative values, `feeBps > MAX_FEE_BPS` and `tokensSold > CURVE_SUPPLY` throw
-  `RangeError`.
-- Do not modify `state`.
+README.md has the same spec with a bit more explanation. If anything is unclear, the contract is the reference. It is verified on the explorer, see the _buy and sell functions:
+https://sepolia-explorer.giwa.io/address/0xb36ee0ACEAe9685c3fCe5e6cB9e05D385f7bd5fB (GIWA Sepolia, chain id 91342)
 
-The same spec, with more explanation, is in `README.md`. The contract is
-verified on the explorer and is the reference if anything is unclear:
-[`0xb36ee0ACEAe9685c3fCe5e6cB9e05D385f7bd5fB`](https://sepolia-explorer.giwa.io/address/0xb36ee0ACEAe9685c3fCe5e6cB9e05D385f7bd5fB)
-(GIWA Sepolia, chain id `91342`), functions `_buy` and `sell`.
+Test vectors
 
-## Test vectors
+test/vectors.json has 36 real trades from GIWA Sepolia, 20 buys and 16 sells across 31 tokens. Each one has the transaction hash, an explorer link, the curve state at the block before the trade, the input, and the output the chain actually produced. test/quote.test.js checks every vector for exact equality and adds edge cases: zero input, a graduated curve, buys at and past the graduation limit, selling more than was sold, and input validation.
 
-[`test/vectors.json`](./test/vectors.json) contains 36 real trades from GIWA
-Sepolia: 20 buys and 16 sells on 31 tokens. Each has the transaction hash, an
-explorer link, the curve state at the block before the trade, the input and the
-output the chain actually produced. `test/quote.test.js` requires exact equality
-for every vector and adds edge cases (zero input, graduated curve, buys at and
-beyond the graduation limit, selling more than was sold, input validation).
+To run them: npm ci, then npm test.
 
-```sh
-npm ci
-npm test
-```
+Done means
 
-## Definition of done
+All tests in test/quote.test.js pass in CI on Node 20 and 22. The test files and vectors are not changed, package.json still has no runtime dependencies, the code lives in src/index.js as ESM with BigInt math, and the exported names and signatures stay as they are.
 
-- All tests in `test/quote.test.js` pass in CI (Node 20 and 22).
-- `test/quote.test.js` and `test/vectors.json` are not modified.
-- No new runtime dependencies. `package.json` keeps zero `dependencies`.
-- The implementation is in `src/index.js`, ESM, and uses `BigInt` for all math.
-- The exported names and signatures stay as they are.
+Not part of this task: reading state from the chain, RPC or wallet code, price charts or slippage helpers, quotes for the DEX pool after graduation, TypeScript, build tooling, npm publishing, and CI changes.
 
-## Out of scope
-
-- Reading state from the chain, RPC clients, wallet or transaction code.
-- Price charts, market cap, slippage helpers, or quotes for the DEX pool after
-  graduation.
-- TypeScript conversion, build tooling, bundling, publishing to npm.
-- Changes to CI workflows.
-
-## Notes
-
-- The tests and vectors were committed before this bounty was funded, so the
-  target could not be adjusted afterwards.
-- This runs on a testnet. The bounty is test ETH with no monetary value.
-- One pull request per attempt. The first pull request that meets the
-  definition of done is merged.
+The tests and vectors were committed before the bounty was funded, so the target can't move afterwards. This is a testnet, the bounty is test ETH with no monetary value. The first pull request that meets the above gets merged.
