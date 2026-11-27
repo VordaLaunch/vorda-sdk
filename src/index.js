@@ -44,6 +44,38 @@ export const MAX_FEE_BPS = 500n;
  * @property {bigint} fee    Fee taken from the gross ETH, in wei.
  */
 
+const STATE_FIELDS = ['virtualEth', 'virtualToken', 'realEth', 'tokensSold', 'feeBps'];
+
+/** ceilDiv(a, b) = 0 if a == 0, otherwise (a - 1) / b + 1. BigInt division floors. */
+function ceilDiv(a, b) {
+  return a === 0n ? 0n : (a - 1n) / b + 1n;
+}
+
+/** Every state field must be a BigInt, otherwise TypeError. */
+function checkStateTypes(state) {
+  for (const field of STATE_FIELDS) {
+    if (typeof state[field] !== 'bigint') {
+      throw new TypeError(`state.${field} must be a bigint`);
+    }
+  }
+}
+
+/** Negative state fields, feeBps above MAX_FEE_BPS and tokensSold above
+ *  CURVE_SUPPLY throw RangeError. */
+function checkStateRanges(state) {
+  for (const field of STATE_FIELDS) {
+    if (state[field] < 0n) {
+      throw new RangeError(`state.${field} must not be negative`);
+    }
+  }
+  if (state.feeBps > MAX_FEE_BPS) {
+    throw new RangeError('state.feeBps exceeds MAX_FEE_BPS');
+  }
+  if (state.tokensSold > CURVE_SUPPLY) {
+    throw new RangeError('state.tokensSold exceeds CURVE_SUPPLY');
+  }
+}
+
 /**
  * Exact result of `buy(token, ...)` with `msg.value = ethIn` on the given state.
  *
@@ -52,7 +84,39 @@ export const MAX_FEE_BPS = 500n;
  * @returns {BuyQuote}
  */
 export function quoteBuy(state, ethIn) {
-  throw new Error('not implemented');
+  if (typeof ethIn !== 'bigint') {
+    throw new TypeError('ethIn must be a bigint');
+  }
+  checkStateTypes(state);
+  if (ethIn < 0n) {
+    throw new RangeError('ethIn must not be negative');
+  }
+  checkStateRanges(state);
+
+  const { virtualEth, virtualToken, tokensSold, feeBps } = state;
+
+  if (ethIn === 0n || tokensSold === CURVE_SUPPLY) {
+    return { tokensOut: 0n, fee: 0n, refund: 0n };
+  }
+
+  let fee = (ethIn * feeBps) / BPS;
+  let netIn = ethIn - fee;
+  const remaining = CURVE_SUPPLY - tokensSold;
+  let tokensOut = (virtualToken * netIn) / (virtualEth + netIn);
+  let refund = 0n;
+
+  if (tokensOut >= remaining) {
+    // This buy sells out the curve: fill exactly what is left, charge only
+    // what those tokens cost, and refund the rest of ethIn.
+    tokensOut = remaining;
+    netIn = ceilDiv(virtualEth * tokensOut, virtualToken - tokensOut);
+    let gross = ceilDiv(netIn * BPS, BPS - feeBps);
+    if (gross > ethIn) gross = ethIn;
+    fee = gross - netIn;
+    refund = ethIn - gross;
+  }
+
+  return { tokensOut, fee, refund };
 }
 
 /**
@@ -63,5 +127,29 @@ export function quoteBuy(state, ethIn) {
  * @returns {SellQuote}
  */
 export function quoteSell(state, tokensIn) {
-  throw new Error('not implemented');
+  if (typeof tokensIn !== 'bigint') {
+    throw new TypeError('tokensIn must be a bigint');
+  }
+  checkStateTypes(state);
+  if (tokensIn < 0n) {
+    throw new RangeError('tokensIn must not be negative');
+  }
+  checkStateRanges(state);
+
+  const { virtualEth, virtualToken, realEth, tokensSold, feeBps } = state;
+
+  if (tokensIn > tokensSold) {
+    throw new RangeError('tokensIn exceeds tokensSold');
+  }
+
+  if (tokensIn === 0n || tokensSold === CURVE_SUPPLY) {
+    return { ethOut: 0n, fee: 0n };
+  }
+
+  let grossOut = (virtualEth * tokensIn) / (virtualToken + tokensIn);
+  if (grossOut > realEth) grossOut = realEth;
+  const fee = (grossOut * feeBps) / BPS;
+  const ethOut = grossOut - fee;
+
+  return { ethOut, fee };
 }
